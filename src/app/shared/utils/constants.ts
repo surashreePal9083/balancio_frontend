@@ -20,7 +20,7 @@ export const API_CONFIG = {
   // BASE_URL: 'https://balancio-backend.vercel.app/api',
   // You can add different environments here:
   // BASE_URL: 'http://localhost:8000/api',
-  BASE_URL: 'balancio-backend-3kzs.vercel.app',
+  BASE_URL: 'https://balancio-backend-3kzs.vercel.app/api',
   
   ENDPOINTS: {
     AUTH: {
