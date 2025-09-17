@@ -1,0 +1,176 @@
+/* Floating Action Button Styles */
+
+/* Ensure component always appears on top */
+:host {
+  position: relative;
+  z-index: 9999 !important;
+}
+
+.fab-main {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  z-index: 10000 !important;
+}
+
+.fab-main:hover {
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.fab-main.rotate-45 {
+  transform: rotate(45deg) scale(1.05);
+}
+
+/* Animation for menu items */
+.fab-menu-item {
+  animation: fabSlideIn 0.3s ease-out;
+}
+
+@keyframes fabSlideIn {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Menu item animations with stagger */
+.fab-menu-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.fab-menu-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Hover effects for menu buttons */
+.fab-menu-item button {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.fab-menu-item button:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Tooltip styles */
+.fab-tooltip {
+  white-space: nowrap;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+/* Ripple effect */
+.fab-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.fab-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.fab-ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  /* Ensure FAB is always visible on mobile */
+  :host {
+    z-index: 9999 !important;
+    position: fixed !important;
+  }
+  
+  .fab-main {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
+    z-index: 10000 !important;
+    position: fixed !important;
+  }
+  
+  .fab-menu-item {
+    animation: fabSlideInMobile 0.4s ease-out;
+    z-index: 9999 !important;
+  }
+  
+  .fab-menu-item button {
+    width: 3rem !important;
+    height: 3rem !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+    z-index: 9999 !important;
+  }
+  
+  .fab-tooltip {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 9999 !important;
+  }
+  
+  /* Enhanced mobile interaction area */
+  .touch-target {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Mobile-specific slide in animation */
+  @keyframes fabSlideInMobile {
+    from {
+      transform: translateX(120px) scale(0.8);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+  
+  /* Force visibility on mobile */
+  app-floating-action-button,
+  .mobile-fab-visible {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+    position: relative !important;
+  }
+  
+  .mobile-fab-visible * {
+    z-index: 9999 !important;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .fab-main,
+  .fab-menu-item,
+  .fab-menu-item button {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Focus states for accessibility */
+.fab-main:focus,
+.fab-menu-item button:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
