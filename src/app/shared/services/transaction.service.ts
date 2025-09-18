@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, map, tap, catchError, of, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
+import { ToastNotificationService } from './toast-notification.service';
 import { Transaction } from '../models/transaction.model';
 import { API_CONFIG } from '../utils/constants';
 
@@ -11,7 +12,8 @@ import { API_CONFIG } from '../utils/constants';
 export class TransactionService {
   constructor(
     private apiService: ApiService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private toastService: ToastNotificationService
   ) {}
 
   getTransactions(): Observable<Transaction[]> {
@@ -31,6 +33,14 @@ export class TransactionService {
           createdAt: new Date(t.created_at || t.createdAt || Date.now()),
           updatedAt: new Date(t.updated_at || t.updatedAt || Date.now())
         }));
+      }),
+      catchError((error) => {
+        console.error('Error fetching transactions:', error);
+        this.toastService.error(
+          'Failed to Load Transactions',
+          'Unable to fetch transactions. Please try again later.'
+        );
+        return throwError(() => error);
       })
     );
   }
@@ -48,7 +58,15 @@ export class TransactionService {
         userId: t.userId,
         createdAt: new Date(t.createdAt),
         updatedAt: new Date(t.updatedAt)
-      }))
+      })),
+      catchError((error) => {
+        console.error(`Error fetching transaction ${id}:`, error);
+        this.toastService.error(
+          'Failed to Load Transaction',
+          'Unable to fetch transaction details. Please try again later.'
+        );
+        return throwError(() => error);
+      })
     );
   }
 
@@ -81,6 +99,22 @@ export class TransactionService {
           message: `${t.title} - $${t.amount}`,
           type: t.type === 'income' ? 'success' : 'info'
         });
+      }),
+      catchError((error) => {
+        console.error('Error creating transaction:', error);
+        let errorMessage = 'Unable to create transaction. Please try again later.';
+        
+        // Handle specific error cases
+        if (error.status === 400) {
+          errorMessage = 'Invalid transaction data. Please check your input.';
+        } else if (error.status === 401) {
+          errorMessage = 'Authentication required. Please log in.';
+        } else if (error.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+        
+        this.toastService.error('Failed to Create Transaction', errorMessage);
+        return throwError(() => error);
       })
     );
   }
@@ -106,7 +140,25 @@ export class TransactionService {
         userId: t.userId,
         createdAt: new Date(t.createdAt),
         updatedAt: new Date(t.updatedAt)
-      }))
+      })),
+      catchError((error) => {
+        console.error(`Error updating transaction ${id}:`, error);
+        let errorMessage = 'Unable to update transaction. Please try again later.';
+        
+        // Handle specific error cases
+        if (error.status === 400) {
+          errorMessage = 'Invalid transaction data. Please check your input.';
+        } else if (error.status === 401) {
+          errorMessage = 'Authentication required. Please log in.';
+        } else if (error.status === 404) {
+          errorMessage = 'Transaction not found.';
+        } else if (error.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+        
+        this.toastService.error('Failed to Update Transaction', errorMessage);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -118,6 +170,22 @@ export class TransactionService {
           message: 'Transaction has been successfully removed',
           type: 'info'
         });
+      }),
+      catchError((error) => {
+        console.error(`Error deleting transaction ${id}:`, error);
+        let errorMessage = 'Unable to delete transaction. Please try again later.';
+        
+        // Handle specific error cases
+        if (error.status === 401) {
+          errorMessage = 'Authentication required. Please log in.';
+        } else if (error.status === 404) {
+          errorMessage = 'Transaction not found.';
+        } else if (error.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+        
+        this.toastService.error('Failed to Delete Transaction', errorMessage);
+        return throwError(() => error);
       })
     );
   }

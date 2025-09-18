@@ -29,6 +29,9 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
   titleSuggestions: string[] = [];
   showSuggestions = false;
   
+  // Form error messages
+  formErrors: { [key: string]: string } = {};
+  
   // Static title suggestions for better UX
   private static expenseSuggestions = [
     'Groceries', 'Gas', 'Restaurant', 'Coffee', 'Uber/Taxi', 'Shopping',
@@ -63,6 +66,11 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
       categoryId: ['', [Validators.required]],
       description: [''],
       date: [new Date().toISOString().split('T')[0], [Validators.required]]
+    });
+    
+    // Subscribe to form value changes to clear errors
+    this.transactionForm.valueChanges.subscribe(() => {
+      this.clearFormErrors();
     });
   }
 
@@ -103,22 +111,29 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading categories:', error);
-          this.toastService.error('Error', 'Failed to load categories');
+          this.toastService.error('Error', 'Failed to load categories. Please try again later.');
         }
       });
   }
 
   loadTransaction(id: string) {
-    this.transactionService.getTransaction(id).subscribe(transaction => {
-      if (transaction) {
-        this.transactionForm.patchValue({
-          title: transaction.title,
-          amount: transaction.amount,
-          type: transaction.type,
-          categoryId: transaction.categoryId,
-          description: transaction.description,
-          date: new Date(transaction.date).toISOString().split('T')[0]
-        });
+    this.transactionService.getTransaction(id).subscribe({
+      next: (transaction) => {
+        if (transaction) {
+          this.transactionForm.patchValue({
+            title: transaction.title,
+            amount: transaction.amount,
+            type: transaction.type,
+            categoryId: transaction.categoryId,
+            description: transaction.description,
+            date: new Date(transaction.date).toISOString().split('T')[0]
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error loading transaction:', error);
+        this.toastService.error('Error', 'Failed to load transaction details. Please try again later.');
+        this.router.navigate(['/transactions']);
       }
     });
   }
@@ -152,11 +167,12 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error saving transaction:', error);
-          this.toastService.error('Failed to Save Transaction', 'Please try again');
+          this.handleTransactionError(error);
           this.isLoading = false;
         }
       });
     } else {
+      this.validateForm();
       this.toastService.warning('Form Invalid', 'Please fill in all required fields correctly');
     }
   }
@@ -211,5 +227,86 @@ export class TransactionFormComponent implements OnInit, OnDestroy {
   get filteredCategories(): Category[] {
     const currentType = this.transactionForm.get('type')?.value || 'expense';
     return this.categories.filter(cat => cat.type === currentType);
+  }
+
+  // Form validation methods
+  private validateForm(): void {
+    this.clearFormErrors();
+    
+    const controls = this.transactionForm.controls;
+    
+    Object.keys(controls).forEach(controlName => {
+      const control = controls[controlName];
+      if (control.errors) {
+        this.formErrors[controlName] = this.getErrorMessage(controlName, control.errors);
+      }
+    });
+  }
+
+  private getErrorMessage(controlName: string, errors: any): string {
+    const errorMessages: { [key: string]: { [key: string]: string } } = {
+      'title': {
+        'required': 'Title is required'
+      },
+      'amount': {
+        'required': 'Amount is required',
+        'min': 'Amount must be greater than 0'
+      },
+      'type': {
+        'required': 'Transaction type is required'
+      },
+      'categoryId': {
+        'required': 'Category is required'
+      },
+      'date': {
+        'required': 'Date is required'
+      }
+    };
+    
+    const controlErrors = errorMessages[controlName];
+    if (controlErrors) {
+      for (const errorKey in errors) {
+        if (controlErrors[errorKey]) {
+          return controlErrors[errorKey];
+        }
+      }
+    }
+    
+    return 'This field is invalid';
+  }
+
+  private clearFormErrors(): void {
+    this.formErrors = {};
+  }
+
+  private handleTransactionError(error: any): void {
+    // Handle specific error cases
+    if (error.status === 400) {
+      // Validation errors
+      if (error.error && typeof error.error === 'object') {
+        // Extract field-specific errors
+        Object.keys(error.error).forEach(field => {
+          const fieldErrors = error.error[field];
+          if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+            this.formErrors[field] = fieldErrors[0];
+          }
+        });
+        
+        // Show a general error message
+        this.toastService.error('Validation Error', 'Please check the form for errors');
+      } else {
+        this.toastService.error('Invalid Data', 'Please check your input and try again');
+      }
+    } else if (error.status === 401) {
+      this.toastService.error('Authentication Required', 'Please log in to continue');
+    } else if (error.status === 403) {
+      this.toastService.error('Access Denied', 'You do not have permission to perform this action');
+    } else if (error.status === 404) {
+      this.toastService.error('Not Found', 'The requested resource could not be found');
+    } else if (error.status >= 500) {
+      this.toastService.error('Server Error', 'An unexpected error occurred on the server. Please try again later.');
+    } else {
+      this.toastService.error('Error', 'An unexpected error occurred. Please try again later.');
+    }
   }
 }
