@@ -55,6 +55,8 @@ export class ExpenseChartComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges() {
+    console.log(this.transactions);
+    
     this.processExpenseData();
     if (this.chart) {
       this.updateChart();
@@ -106,7 +108,7 @@ export class ExpenseChartComponent implements OnChanges, AfterViewInit {
                 label: 'Total Expenses',
                 fontSize: '14px',
                 formatter: () => {
-                  return this.currencySymbol + this.totalExpenses.toLocaleString();
+                  return this.currencySymbol + this.totalExpenses.toString();
                 }
               }
             }
@@ -179,7 +181,7 @@ export class ExpenseChartComponent implements OnChanges, AfterViewInit {
 
     this.totalExpenses = this.transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     this.balance = this.totalIncome - this.totalExpenses;
   }
@@ -200,7 +202,9 @@ export class ExpenseChartComponent implements OnChanges, AfterViewInit {
       .filter(t => t.type === 'expense')
       .reduce((acc, expense) => {
         const categoryName = this.getCategoryName(expense.categoryId || '');
-        acc.set(categoryName, (acc.get(categoryName) || 0) + expense.amount);
+        console.log("", categoryName);
+        
+        acc.set(categoryName, (acc.get(categoryName) || 0) +Number( expense.amount));
         return acc;
       }, new Map<string, number>());
 
@@ -220,7 +224,9 @@ export class ExpenseChartComponent implements OnChanges, AfterViewInit {
   }
 
   private getCategoryName(categoryId: string): string {
-    const category = this.categories.find(cat => cat._id === categoryId);
+    console.log(this.categories, categoryId);
+    
+    const category = this.categories.find(cat => cat.id === categoryId);
     return category ? category.name : 'Unknown Category';
   }
 }

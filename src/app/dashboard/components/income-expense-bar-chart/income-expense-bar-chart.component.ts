@@ -180,9 +180,9 @@ export class IncomeExpenseBarChartComponent implements OnChanges, AfterViewInit 
       
       if (monthIndex !== -1) {
         if (transaction.type === 'income') {
-          income[monthIndex] += transaction.amount;
+          income[monthIndex] += Number(transaction.amount);
         } else {
-          expenses[monthIndex] += transaction.amount;
+          expenses[monthIndex] +=  Number(transaction.amount);
         }
       }
     });

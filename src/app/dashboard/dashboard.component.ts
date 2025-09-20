@@ -177,19 +177,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
+  expenseTransactions:any[] = [];
+  incomeTransactions:any[] = [];
 
   calculateTotals() {
-    const incomeTransactions = this.transactions.filter(t => t.type === 'income');
-    const expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+    this.incomeTransactions = this.transactions.filter(t => t.type === 'income');
+     this.expenseTransactions = this.transactions.filter(t => t.type === 'expense');
+
     
-    this.totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
-    this.totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+    this.totalIncome = this.incomeTransactions.reduce((sum:number, t) => sum +Number( t.amount), 0);
+    this.totalExpenses = this.expenseTransactions.reduce((sum:number, t) => sum + Number(t.amount), 0);
     this.balance = this.totalIncome - this.totalExpenses;
     
     // Calculate transaction counts
     this.totalTransactionCount = this.transactions.length;
-    this.incomeTransactionCount = incomeTransactions.length;
-    this.expenseTransactionCount = expenseTransactions.length;
+    this.incomeTransactionCount = this.incomeTransactions.length;
+    this.expenseTransactionCount = this.expenseTransactions.length;
   }
 
   // Budget helper methods

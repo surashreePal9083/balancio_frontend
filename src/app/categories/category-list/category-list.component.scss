@@ -2,3 +2,68 @@
 .material-icons {
   font-size: 20px;
 }
+
+/* Action menu button */
+.action-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  color: #9ca3af; /* gray-400 */
+  transition: all 0.2s ease;
+}
+
+.action-menu-button:hover {
+  color: #6b7280; /* gray-500 */
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+/* Dropdown menu positioning */
+.relative {
+  position: relative;
+}
+
+.relative .absolute {
+  position: absolute;
+}
+
+/* Ensure dropdown appears above other elements */
+.z-50 {
+  z-index: 50;
+}
+
+/* Prevent dropdown from going off-screen */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 0.25rem;
+}
+
+/* Dropdown items */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item.edit {
+  color: #374151; /* gray-700 */
+}
+
+.dropdown-item.edit:hover {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+.dropdown-item.delete {
+  color: #dc2626; /* red-600 */
+}
+
+.dropdown-item.delete:hover {
+  background-color: #fef2f2; /* red-50 */
+}
